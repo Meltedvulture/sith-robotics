@@ -11,18 +11,20 @@ DB_NAME = os.getenv("DB_NAME", "SITH")
 DB_USER = os.getenv("DB_USER", "SITH")
 DB_PASS = os.getenv("DB_PASS", "SITH")
 MQTT_HOST = os.getenv("MQTT_HOST", "SITH-MQTT-Broker")
-MQTT_PORT = int(os.getenv("MQTT_PORT", 6683))
+MQTT_PORT = int(os.getenv("MQTT_PORT", 1883))
 POLL_INTERVAL = int(os.getenv("POLL_INTERVAL_SECONDS", 5))
 
-TOPIC_PREFIX = "challenges/" 
+TOPIC_PREFIX = "rovers/" 
 # File to store the list of module names from the previous run
 TRACKING_FILE = "/app/published_modules.json"
 
 # --- Mosquitto Client Setup ---
-def on_connect(client, userdata, flags, rc):
+def on_connect(client, userdata, flags, rc, properties):
     print(f"Connected to MQTT broker: {mqtt.connack_string(rc)}")
 
-mqtt_client = mqtt.Client()
+print(f"Connecting to MQTT broker... {MQTT_HOST}:{MQTT_PORT}")
+# mqtt_client = mqtt.Client()
+mqtt_client = mqtt.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION2)
 mqtt_client.on_connect = on_connect
 mqtt_client.connect(MQTT_HOST, MQTT_PORT, 60)
 mqtt_client.loop_start()
@@ -61,7 +63,7 @@ def read_and_publish_data():
         )
         cur = conn.cursor(dictionary=True)
 
-        query = "SELECT moduleName, moduleValue FROM Challenges;"
+        query = "SELECT roverID, data FROM rovers;"
         cur.execute(query)
         
         results = cur.fetchall()
@@ -71,8 +73,8 @@ def read_and_publish_data():
         if results:
             for record in results:
                 
-                module_name = record.get('moduleName')
-                module_value = record.get('moduleValue')
+                module_name = record.get('roverID')
+                module_value = record.get('data')
 
                 if not module_name or module_value is None:
                     continue # Skip invalid records
@@ -114,10 +116,10 @@ def read_and_publish_data():
 
     except Exception as e:
         # Exception handling remains the same for database issues
-        if "Challenges' doesn't exist" in str(e):
-             print(f"[{datetime.now().strftime('%H:%M:%S')}] ERROR: The 'Challenges' table is missing from the database.")
+        if "rovers' doesn't exist" in str(e):
+             print(f"[{datetime.now().strftime('%H:%M:%S')}] ERROR: The 'rovers' table is missing from the database.")
         elif "Unknown column" in str(e):
-             print(f"[{datetime.now().strftime('%H:%M:%S')}] ERROR: Missing required column(s) in the 'Challenges' table.")
+             print(f"[{datetime.now().strftime('%H:%M:%S')}] ERROR: Missing required column(s) in the 'rovers' table.")
         else:
              print(f"[{datetime.now().strftime('%H:%M:%S')}] ERROR: Could not read database or publish to MQTT: {e}")
              
