@@ -1,0 +1,23 @@
+{
+    "name": "Sith Server",
+    "dockerComposeFile": [
+        "../docker-compose.yml"
+    ],
+    "service": "php",
+    "workspaceFolder": "/var/www/html",
+    "shutdownAction": "stopCompose",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "felixfbecker.php-debug",
+                "bmewburn.vscode-intelephense-client",
+                "cweijan.dbclient-jdbc",
+                "cweijan.vscode-database-client2"
+            ],
+            "settings": {
+                "php.validate.executablePath": "/usr/local/bin/php"
+            }
+        }
+    }
+
+}
