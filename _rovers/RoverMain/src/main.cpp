@@ -10,7 +10,8 @@
 
 // Set to true to enable Serial comms.
 // set to false to stop all serial comms.
-#define DEBUG true
+#define DEBUG false //This makes the device not work until you open the serial monitor, only use when you need to debug
+//otherwise turn off for devices not connected to a computer
 const int buzzer = 10;  //buzzer to arduino pin 10
 
 // --- NEW CONSTANT DEFINITION ---
@@ -35,8 +36,10 @@ Adafruit_NeoPixel pixels(1, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
 #include <Adafruit_MotorShield.h>
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 // Select which 'port' M1, M2, M3 or M4. In this case, M1
-Adafruit_DCMotor *motorLeft = AFMS.getMotor(2);
-Adafruit_DCMotor *motorRight = AFMS.getMotor(3);
+Adafruit_DCMotor *motorLeft = AFMS.getMotor(1); //testing this not final
+Adafruit_DCMotor *motorBackLeft = AFMS.getMotor(2);
+Adafruit_DCMotor *motorBackRight = AFMS.getMotor(3);
+Adafruit_DCMotor *motorRight = AFMS.getMotor(4); //testing this not final
 
 void initialiseTemperatureMotionWing() {
   if (!tempsensor.begin()) {
@@ -123,14 +126,21 @@ void commandTest() {
 void commandForward() {
   motorLeft->setSpeed(150);
   motorRight->setSpeed(150);
+  motorBackLeft->setSpeed(150); //testing this not final
+  motorBackRight->setSpeed(150); //testing this not final
+
 
   motorLeft->run(FORWARD);
   motorRight->run(FORWARD);
+  motorBackLeft->run(FORWARD); //testing this not final
+  motorBackRight->run(FORWARD); //testing this not final
   delay(100);  // Runs the motors for 1 second
 
   // Stops the motors
   motorLeft->run(RELEASE);
   motorRight->run(RELEASE);
+  motorBackLeft->run(RELEASE); //testing this not final
+  motorBackRight->run(RELEASE); //testing this not final
 }
 
 void commandBackward() {
@@ -139,11 +149,15 @@ void commandBackward() {
 
   motorLeft->run(BACKWARD);
   motorRight->run(BACKWARD);
+  motorBackLeft->run(BACKWARD); //testing this not final
+  motorBackRight->run(BACKWARD); //testing this not final
   delay(100);  // Runs the motors for 1 second
 
   // Stops the motors
   motorLeft->run(RELEASE);
   motorRight->run(RELEASE);
+  motorBackLeft->run(RELEASE); //testing this not final
+  motorBackRight->run(RELEASE); //testing this not final
 }
 
 
@@ -153,11 +167,15 @@ void commandRight() {
 
   motorLeft->run(FORWARD);
   motorRight->run(BACKWARD);
+  motorBackLeft->run(FORWARD); //testing this not final
+  motorBackRight->run(BACKWARD); //testing this not final
   delay(100);  // Runs the motors for 1 second
 
   // Stops the motors
   motorLeft->run(RELEASE);
   motorRight->run(RELEASE);
+  motorBackLeft->run(RELEASE); //testing this not final
+  motorBackRight->run(RELEASE); //testing this not final
 }
 
 
@@ -165,19 +183,26 @@ void commandLeft() {
   motorLeft->setSpeed(150);
   motorRight->setSpeed(150);
 
+
   motorLeft->run(BACKWARD);
   motorRight->run(FORWARD);
+  motorBackLeft->run(BACKWARD); //testing this not final
+  motorBackRight->run(FORWARD); //testing this not final
   delay(100);  // Runs the motors for 1 second
 
   // Stops the motors
   motorLeft->run(RELEASE);
   motorRight->run(RELEASE);
+  motorBackLeft->run(RELEASE); //testing this not final
+  motorBackRight->run(RELEASE); //testing this not final
 }
 
 void commandStop() {
   // Stops the motors
   motorLeft->run(RELEASE);
   motorRight->run(RELEASE);
+  motorBackLeft->run(RELEASE);
+  motorBackRight->run(RELEASE);
 }
 
 void commandStart() {

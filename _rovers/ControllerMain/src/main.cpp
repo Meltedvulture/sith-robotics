@@ -10,7 +10,11 @@
 
 // Set to true to enable Serial comms.
 // set to false to stop all serial comms.
-#define DEBUG true
+
+
+#define DEBUG false //This makes the device not work until you open the serial monitor, only use when you need to debug
+//otherwise turn off for devices not connected to a computer
+
 
 // --- NEW CONSTANT DEFINITION ---
 const char* ROVER_ID = "1"; // Define the constant ID here
@@ -125,7 +129,7 @@ void transmitButtonCommands() {
 
   color = ST77XX_BLACK;
   if (!(buttons & TFTWING_BUTTON_DOWN)) {
-    // Serial.println("DOWN");
+    Serial.println("DOWN");
     color = ST77XX_WHITE;
     transmitData("backward", ROVER_ID);
   }
@@ -177,10 +181,9 @@ void transmitButtonCommands() {
 // Setup function runs once at startup
 void setup() {
   initialiseLoraPins();  // Configure LoRa module pins
-
   if (DEBUG) {
-    initialiseSerial();  // Start serial communication
-  }
+    initialiseSerial();
+  }// Start serial communication
   resetRadio();         // Reset the LoRa radio module
   initialiseRadio();    // Initialise radio settings
   setRadioFrequency();  // Set operating frequency

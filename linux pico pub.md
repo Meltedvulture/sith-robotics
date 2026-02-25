@@ -5,8 +5,8 @@ cd /etc/udev/rules.d/
 #Create a rules file using this command:
 sudo nano /etc/udev/rules.d/99-picotool.rules
 
-#Inside the opened rules file, paste the following inside:
 
+#Inside the opened rules file, paste the following inside:
 
 # /etc/udev/rules.d/99-pico.rules
 
