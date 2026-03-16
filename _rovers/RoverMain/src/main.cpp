@@ -33,12 +33,6 @@ Adafruit_ADT7410 tempsensor = Adafruit_ADT7410();
 
 
 
-// TEST THE COMMS UPGRADE REMOVE THIS COMMENT WHEN DONE
-// TEST THE COMMS UPGRADE REMOVE THIS COMMENT WHEN DONE
-// TEST THE COMMS UPGRADE REMOVE THIS COMMENT WHEN DONE
-// TEST THE COMMS UPGRADE REMOVE THIS COMMENT WHEN DONE
-
-
 #include "comms.h"
 
 // For use with the onboard Neopixel (RGB LED)
@@ -264,7 +258,7 @@ void loop() {
     commandBackward();
     startTime = currentTime; 
   }
-    // This is suppose to stop  the rover if nothing has been recieved for 1 seconds, all checks should fail meaning no valid command up until this point
+    // This is suppose to stop the rover if nothing has been recieved for 1 seconds, all checks should fail meaning no valid command up until this point
   else if (elapsedTime >= 1000){
     commandStop();
     startTime = currentTime; 

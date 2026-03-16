@@ -12,7 +12,7 @@
 // set to false to stop all serial comms.
 
 
-#define DEBUG true //This makes the device not work until you open the serial monitor, only use when you need to debug
+#define DEBUG false //This makes the device not work until you open the serial monitor, only use when you need to debug
 //otherwise turn off for devices not connected to a computer
 
 
@@ -27,10 +27,6 @@ const char* ROVER_ID = "1"; // Define the constant ID here
 #include <Adafruit_ST7735.h>
 #include "Adafruit_miniTFTWing.h"
 
-// TEST THE COMMS UPGRADE REMOVE THIS COMMENT WHEN DONE
-// TEST THE COMMS UPGRADE REMOVE THIS COMMENT WHEN DONE
-// TEST THE COMMS UPGRADE REMOVE THIS COMMENT WHEN DONE
-// TEST THE COMMS UPGRADE REMOVE THIS COMMENT WHEN DONE
 
 
 Adafruit_miniTFTWing ss;
@@ -113,10 +109,11 @@ void cycleBasicCommands() {
 // The movement function will run slower as to not spam the lora network
 void transmitStopCommand(){
   uint32_t buttons = ss.readButtons();
-
-  if (buttons == 3740 & hasSentStop == false){ 
-    Serial.println("I have sent stop once, I think");
+  
+  if (buttons == 3740 & hasSentStop == false){
+    for (int i = 0; i <= 2; i++){ 
     transmitData("stop", ROVER_ID);
+  }
     hasSentStop = true;
     return;
   }
@@ -156,7 +153,7 @@ void transmitButtonCommands() {
 
   color = ST77XX_BLACK;
   if (!(buttons & TFTWING_BUTTON_DOWN)) {
-    Serial.println("DOWN");
+    // Serial.println("DOWN");
     color = ST77XX_WHITE;
     transmitData("backward", ROVER_ID);
     hasSentStop = false;
