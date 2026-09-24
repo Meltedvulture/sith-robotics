@@ -1,4 +1,10 @@
 #include <Arduino.h>
+#include <stdio.h>
+#include "pico/stdlib.h"
+#include "hardware/timer.h"
+#include <Wire.h>
+#include "Adafruit_ADT7410.h"
+
 // Feather9x_TX
 // -*- mode: C++ -*-
 // Example sketch showing how to create a simple messaging client (transmitter)
@@ -21,8 +27,7 @@ const int buzzer = 10;  //buzzer to arduino pin 10
 // --- NEW CONSTANT DEFINITION ---
 const char *ROVER_ID = "1";
 
-#include <Wire.h>
-#include "Adafruit_ADT7410.h"
+
 
 // Create the ADT7410 temperature sensor object
 Adafruit_ADT7410 tempsensor = Adafruit_ADT7410();
@@ -49,6 +54,7 @@ Adafruit_DCMotor *motorRight = AFMS.getMotor(4); //testing this not final
 
 String cachedMessage = "";
 int cachedRssi = 0;
+bool currentlyRoaming = true;
 
 // Command definitions
 String test_command = String(ROVER_ID) + ",test";
@@ -59,6 +65,11 @@ String left_command = String(ROVER_ID) + ",left";
 String stop_command = String(ROVER_ID) + ",stop";
 String beep_command = String(ROVER_ID) + ",beep";
 String backward_command = String(ROVER_ID) + ",backward";
+String autonomous_command = String(ROVER_ID) + ",autonomousToggle";
+
+#define TRIG_PIN 5
+#define ECHO_PIN 6
+#define SPEED_OF_SOUND_CM_US 0.0343
 
 unsigned long startTime;
 
@@ -192,6 +203,57 @@ void commandBeep() {
 }
 
 
+float get_distance_cm() {
+    // 1. Ensure the trigger pin is low to start clean
+    gpio_put(TRIG_PIN, 0);
+    sleep_us(2);
+
+    // 2. Send a 10-microsecond high pulse to trigger the sensor
+    gpio_put(TRIG_PIN, 1);
+    sleep_us(10);
+    gpio_put(TRIG_PIN, 0);
+
+    // 3. Wait for the Echo pin to go HIGH (with a 30ms timeout to prevent hanging)
+    uint32_t start_wait = time_us_32();
+    while (gpio_get(ECHO_PIN) == 0) {
+        if (time_us_32() - start_wait > 30000) { 
+            return -1.0f; // Timeout if no echo signal returns
+        }
+    }
+    uint32_t pulse_start = time_us_32();
+
+    // 4. Wait for the Echo pin to go LOW again
+    start_wait = time_us_32();
+    while (gpio_get(ECHO_PIN) == 1) {
+        if (time_us_32() - start_wait > 30000) { 
+            return -1.0f; // Timeout if echo stays high too long
+        }
+    }
+    uint32_t pulse_end = time_us_32();
+
+    // 5. Calculate time elapsed in microseconds
+    uint32_t pulse_duration = pulse_end - pulse_start;
+
+    // 6. Calculate total round-trip distance, then divide by 2
+    float distance = (pulse_duration * SPEED_OF_SOUND_CM_US) / 2.0f;
+    return distance;
+}
+
+
+
+void roamTick(){
+  commandStop();
+  float currentDistance = get_distance_cm();
+  transmitData(String(currentDistance).c_str(), String(100).c_str());
+  if (currentDistance <= 8.0){
+    currentlyRoaming = false;
+    return;
+  }
+  commandForward();
+  delay(500);
+}
+
+
 void setup() {
   initialiseLoraPins();
   if (DEBUG) {
@@ -231,6 +293,18 @@ void loop() {
 
   if (DEBUG) {
     Serial.println(cachedMessage);
+  }
+  if (cachedMessage == String(ROVER_ID) + ",Ping Devices"){
+    transmitData("Rover", ROVER_ID);
+  }
+
+  if (cachedMessage == autonomous_command) {  // UPDATED TO USE ROVER_ID
+    currentlyRoaming = !currentlyRoaming;
+  }
+
+  if (currentlyRoaming == true){
+    roamTick();
+    return;
   }
 
   if (cachedMessage == test_command) {  // UPDATED TO USE ROVER_ID
@@ -274,9 +348,7 @@ void loop() {
 
 
   
-  if (cachedMessage == String(ROVER_ID) + ",Ping Devices"){
-    transmitData("Rover", ROVER_ID);
-  }
+
 
   
   // transmitTemperature();
